@@ -1,9 +1,9 @@
 /**
- * eZEX C2O Light Switch (3 Channel, E220-KR3N0Z0-HA) - v1.0.1
+ * eZEX C2O Light Switch (3 Channel, E220-KR3N0Z0-HA) - v1.0.2
  *
  *  github: Euiho Lee (flutia)
  *  email: flutia@naver.com
- *  Date: 2018-05-15
+ *  Date: 2018-10-29
  *  Copyright flutia and stsmarthome (cafe.naver.com/stsmarthome/)
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -19,7 +19,7 @@
  *  under the License.
  */
 metadata {
-    definition(name: "eZEX Light Switch-3 Channel (STS)", namespace: "flutia", author: "flutia") {
+    definition(name: "eZEX Light Switch-3 Channel (STS)", namespace: "flutia", author: "flutia", vid: "generic-switch", ocfDeviceType: "oic.d.light") {
         capability "Actuator"
         capability "Switch"
         capability "Configuration"
@@ -62,7 +62,11 @@ metadata {
         }
 
         main(["tileAllOnOff"])
-        details( switchTiles + ["tileOnAll", "tileOffAll", "refresh"])
+        if(switchNumbers() == 4) {
+            details(["tileSW3", "tileOnAll", "tileSW1", "tileSW4", "tileOffAll", "tileSW2", "refresh"])
+        } else {
+            details( switchTiles + ["tileOnAll", "tileOffAll", "refresh"])
+        }
     }
 }
 
@@ -132,7 +136,7 @@ def determineChildDeviceName(ep) {
 }
 
 def updated() {
-    if (!childDevices) {
+    if (!childDevices || childDevices.size() != switchNumbers()) {
         createChildDevices()
     }
     
@@ -152,13 +156,24 @@ def updated() {
 
 def createChildDevices() {
     for (i in 1..switchNumbers()) {
-        log.debug "create child - ${i}, ${device.deviceNetworkId}-${i}, ${device.displayName} (CH${i})"
-        
-        def preferencedName = determineChildDeviceName(i)
-        addChildDevice(
-                "eZEX Light Switch Child Device (STS)", "${device.deviceNetworkId}-ep${i}", null,
-                [completedSetup: true, label: "${preferencedName}", isComponent: true, componentName: "switch${i}", componentLabel: "${i}번 스위치"]
-        )
+        if( childDevices != null ) {
+            def exists = false
+            childDevices.each {
+                def ep = getEPFromChildDNID(it.deviceNetworkId)
+                if( ep == i) { exists = true }
+            }
+            if( exists ) {
+                continue; // skip creation
+            }
+            
+            log.debug "create child - ${i}, ${device.deviceNetworkId}-${i}, ${device.displayName} (CH${i})"
+
+            def preferencedName = determineChildDeviceName(i)
+            addChildDevice(
+                    "eZEX Light Switch Child Device (STS)", "${device.deviceNetworkId}-ep${i}", null,
+                    [completedSetup: true, label: "${preferencedName}", isComponent: true, componentName: "switch${i}", componentLabel: "${i}번 스위치"]
+            )
+        }
     }
 }
 

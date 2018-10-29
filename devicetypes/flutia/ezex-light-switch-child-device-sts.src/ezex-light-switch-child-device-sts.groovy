@@ -1,9 +1,9 @@
 /**
- * eZEX C2O Light Switch Child Device - v1.0.0
+ * eZEX C2O Light Switch Child Device - v1.0.2
  *
  *  github: Euiho Lee (flutia)
  *  email: flutia@naver.com
- *  Date: 2018-01-13
+ *  Date: 2018-10-29
  *  Copyright flutia and stsmarthome (cafe.naver.com/stsmarthome/)
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -17,7 +17,7 @@
  *
  */
 metadata {
-    definition(name: "eZEX Light Switch Child Device (STS)", namespace: "flutia", author: "flutia") {
+    definition(name: "eZEX Light Switch Child Device (STS)", namespace: "flutia", author: "flutia", vid: "generic-switch", ocfDeviceType: "oic.d.light") {
         capability "Switch"
         capability "Actuator"
         capability "Sensor"

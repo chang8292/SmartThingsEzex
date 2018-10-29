@@ -1,5 +1,5 @@
 /**
- * eZEX C2O Light Switch (2 Channel, E220-KR2N0Z0-HA) - v1.0.2
+ * eZEX C2O Light Switch (5 Channel, E220-KR5N0Z0-HA) - v1.0.2
  *
  *  github: Euiho Lee (flutia)
  *  email: flutia@naver.com
@@ -19,7 +19,7 @@
  *  under the License.
  */
 metadata {
-    definition(name: "eZEX Light Switch-2 Channel (STS)", namespace: "flutia", author: "flutia", vid: "generic-switch", ocfDeviceType: "oic.d.light") {
+    definition(name: "eZEX Light Switch-5 Channel (STS)", namespace: "flutia", author: "flutia", vid: "generic-switch", ocfDeviceType: "oic.d.light") {
         capability "Actuator"
         capability "Switch"
         capability "Configuration"
@@ -31,7 +31,7 @@ metadata {
         command "onAll"
         command "offAll"
 
-        fingerprint profileId: "0104", deviceId: "0100", inClusters: "0000, 0003, 0004, 0006", model: "E220-KR2N0Z0-HA"
+        fingerprint profileId: "0104", deviceId: "0100", inClusters: "0000, 0003, 0004, 0006", model: "E220-KR5N0Z0-HA"
     }
 
     simulator {}
@@ -54,6 +54,7 @@ metadata {
             state "default", label: "", action: "refresh.refresh", icon: "st.secondary.refresh"
         }
         standardTile("tileAllOnOff", "device.allstates", width: 2, height: 2, canChangeIcon: true, buildState())
+        valueTile("tileBlank", "", width:2, height:2)
 
         def switchTiles = []
         (1..switchNumbers()).each {
@@ -64,6 +65,10 @@ metadata {
         main(["tileAllOnOff"])
         if(switchNumbers() == 4) {
             details(["tileSW3", "tileOnAll", "tileSW1", "tileSW4", "tileOffAll", "tileSW2", "refresh"])
+        } else if(switchNumbers() == 5) {
+            details(["tileSW4", "tileOnAll", "tileSW1", "tileSW5", "tileOffAll", "tileSW2", "tileBlank", "refresh", "tileSW3"])
+        } else if(switchNumbers() == 6) {
+            details(["tileSW4", "tileOnAll", "tileSW1", "tileSW5", "tileOffAll", "tileSW2", "tileSW6", "refresh", "tileSW3"])
         } else {
             details( switchTiles + ["tileOnAll", "tileOffAll", "refresh"])
         }
@@ -71,7 +76,7 @@ metadata {
 }
 
 def switchNumbers() {
-    2
+    5
 }
 
 def makeSwitchPrem(mm, str, step) {

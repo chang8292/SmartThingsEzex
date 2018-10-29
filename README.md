@@ -4,4 +4,11 @@
 
 # 전등스위치 DTH 설치시 주의사항
 - 2구 이상 전등 스위치는 'eZEX Light Switch Child Device (STS)' DTH도 반드시 같이 설치 해주시기 바랍니다.
-- 1구 전등 스위치는 'eZEX Light Switch-1 Channel (STS)'만 설치하셔도 됩니다.
+- 1구 전등 스위치는 SmartThings의 'ZigBee Switch'를 사용하시기 바랍니다.
+
+# 업데이트 내역
+## 1.0.2 (2018.10.29)
+ - SmartThings App(클래식 앱이 아닌)에서 켜고 끄기를 지원합니다.
+ - 1구 DTH를 삭제하였습니다. (기본으로 제공하는 'ZigBee Switch' DTH에 비해 장점이 없습니다)
+ - DTH Type을 변경할 때 정상적으로 전등 버튼(Child Device)이 만들어지지 않는 문제를 수정하였습니다.
+ 
