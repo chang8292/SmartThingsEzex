@@ -1,9 +1,9 @@
 /**
- * eZEX C2O Light Switch Child Device - v1.0.2
+ * eZEX C2O Light Switch Child Device - v1.0.3
  *
  *  github: Euiho Lee (flutia)
  *  email: flutia@naver.com
- *  Date: 2018-10-29
+ *  Date: 2019-03-21
  *  Copyright flutia and stsmarthome (cafe.naver.com/stsmarthome/)
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -22,6 +22,7 @@ metadata {
         capability "Actuator"
         capability "Sensor"
         capability "Refresh"
+        capability "Health Check"
     }
 
     tiles(scale: 2) {
@@ -45,6 +46,10 @@ def off() {
     parent.childOff(device.deviceNetworkId)
 }
 
-void refresh() {
+def refresh() {
     parent.childRefresh(device.deviceNetworkId)
+}
+
+def ping() {
+    refresh()
 }

@@ -1,9 +1,9 @@
 /**
- * eZEX C2O Light Switch (6 Channel, E220-KR6N0Z0-HA) - v1.0.2
+ * eZEX C2O Light Switch (6 Channel, E220-KR6N0Z0-HA) - v1.0.3
  *
  *  github: Euiho Lee (flutia)
  *  email: flutia@naver.com
- *  Date: 2018-10-29
+ *  Date: 2019-03-31
  *  Copyright flutia and stsmarthome (cafe.naver.com/stsmarthome/)
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -35,7 +35,7 @@ metadata {
     }
 
     simulator {}
-    
+
     preferences {
         (1..switchNumbers()).each {
             input name: "nameOfSwitch${it}", type: "text", title: "${it}번 스위치 이름"
@@ -57,17 +57,15 @@ metadata {
 
         def switchTiles = []
         (1..switchNumbers()).each {
-            childDeviceTile("tileSW${it}", "switch${it}", width:2, height:2)
+            childDeviceTile("tileSW${it}", "switch${it}", width: 2, height: 2)
             switchTiles << "tileSW${it}"
         }
 
         main(["tileAllOnOff"])
-        if(switchNumbers() == 4) {
+        if (switchNumbers() == 4) {
             details(["tileSW3", "tileOnAll", "tileSW1", "tileSW4", "tileOffAll", "tileSW2", "refresh"])
-        } else if(switchNumbers() == 6) {
-            details(["tileSW4", "tileOnAll", "tileSW1", "tileSW5", "tileOffAll", "tileSW2", "tileSW6", "refresh", "tileSW3"])
         } else {
-            details( switchTiles + ["tileOnAll", "tileOffAll", "refresh"])
+            details(switchTiles + ["tileOnAll", "tileOffAll", "refresh"])
         }
     }
 }
@@ -77,14 +75,14 @@ def switchNumbers() {
 }
 
 def makeSwitchPrem(mm, str, step) {
-    for( int i=0; i<2; i++) {
+    for (int i = 0; i < 2; i++) {
         def myStr = str + ((i == 0) ? "◉" : "○")
-        if(step == 0) {
-            if(!mm.contains(myStr)) {
+        if (step == 0) {
+            if (!mm.contains(myStr)) {
                 mm << myStr
             }
         } else {
-            makeSwitchPrem(mm, myStr, step-1)
+            makeSwitchPrem(mm, myStr, step - 1)
         }
     }
 }
@@ -102,7 +100,7 @@ def buildState() {
         state "turningOff", label: '모두 끄는 중', action: "onAll", icon: "st.switches.light.off", backgroundColor: "#00a0dc", nextState: "turningOn"
 
         switchStates.each { item ->
-            state item, label: '${name}', action: "offAll", icon: "st.switches.light.on", backgroundColor: "#00a0dc", nextState: "turningOff"            
+            state item, label: '${name}', action: "offAll", icon: "st.switches.light.on", backgroundColor: "#00a0dc", nextState: "turningOff"
         }
 
         state stateAllOff, label: '${name}', action: "onAll", icon: "st.switches.light.off", backgroundColor: "#ffffff", nextState: "turningOn"
@@ -118,7 +116,7 @@ def determineChildDeviceName(ep) {
     def preferencedName = null
     // preference 값은 이벤트 컨텍스트에서만 가져올 수 있다. 
     try {
-        switch(ep) {
+        switch (ep) {
             case 1: preferencedName = nameOfSwitch1; break;
             case 2: preferencedName = nameOfSwitch2; break;
             case 3: preferencedName = nameOfSwitch3; break;
@@ -126,14 +124,16 @@ def determineChildDeviceName(ep) {
             case 5: preferencedName = nameOfSwitch5; break;
             case 6: preferencedName = nameOfSwitch6; break;
         }
-    } catch(ignore) { log.warn ignore }
-    
-    if( preferencedName != null ) {
+    } catch (ignore) {
+        log.warn ignore
+    }
+
+    if (preferencedName != null) {
         preferencedName = preferencedName.trim()
-        if( preferencedName.length() > 0 ) {
+        if (preferencedName.length() > 0) {
             return preferencedName
         }
-    } 
+    }
     return "${device.displayName} - ${ep}번 스위치"
 }
 
@@ -141,16 +141,16 @@ def updated() {
     if (!childDevices || childDevices.size() != switchNumbers()) {
         createChildDevices()
     }
-    
+
     childDevices.each {
         def ep = getEPFromChildDNID(it.deviceNetworkId)
         def prevLabel = it.getLabel()
         def newLabel = determineChildDeviceName(ep)
-        if( prevLabel != newLabel) {
+        if (prevLabel != newLabel) {
             it.setLabel(newLabel)
         }
     }
-        
+
     if (device.label != state.oldLabel) {
         state.oldLabel = device.label
     }
@@ -158,16 +158,18 @@ def updated() {
 
 def createChildDevices() {
     for (i in 1..switchNumbers()) {
-        if( childDevices != null ) {
+        if (childDevices != null) {
             def exists = false
             childDevices.each {
                 def ep = getEPFromChildDNID(it.deviceNetworkId)
-                if( ep == i) { exists = true }
+                if (ep == i) {
+                    exists = true
+                }
             }
-            if( exists ) {
+            if (exists) {
                 continue; // skip creation
             }
-            
+
             log.debug "create child - ${i}, ${device.deviceNetworkId}-${i}, ${device.displayName} (CH${i})"
 
             def preferencedName = determineChildDeviceName(i)
@@ -184,38 +186,58 @@ def checkOnState(int options, int check) {
 }
 
 def processRefresh(currentValue) {
-    final int SWITCH_NUMBERS = switchNumbers() 
+    final int SWITCH_NUMBERS = switchNumbers()
 
     def value = zigbee.convertHexToInt(currentValue)
-    
-    final def opCheck = [1:0b1, 2:0b10, 3:0b100, 4:0b1000, 5:0b10000, 6:0b100000] // 비트 연산용 배열
+
+    final def opCheck = [1: 0b1, 2: 0b10, 3: 0b100, 4: 0b1000, 5: 0b10000, 6: 0b100000] // 비트 연산용 배열
     def onOffMapByEP = [:]; // [1: "off", 2:"off", 3:"off", 4:"off", ...];
     (1..SWITCH_NUMBERS).each {
         onOffMapByEP[it] = "off"
     }
 
     def allState = ""
-    for(ep in 1..SWITCH_NUMBERS) {
+    def isOnAny = false;
+    for (ep in 1..SWITCH_NUMBERS) {
         def isOn = checkOnState(value, opCheck[ep])
         onOffMapByEP[ep] = isOn ? "on" : "off"
         allState = allState + (isOn ? "◉" : "○")
+        if (isOn) {
+            isOnAny = true;
+        }
     }
 
     def eventStack = []
-    childDevices.each{ childDevice -> 
+    childDevices.each { childDevice ->
         def ep = getEPFromChildDNID(childDevice.deviceNetworkId)
-        childDevice.sendEvent( name: "switch", value: onOffMapByEP[ep], displayed:true)
-        
-        if(state.switchOp) {
+        childDevice.sendEvent(name: "switch", value: onOffMapByEP[ep], displayed: true)
+
+        if (state.switchOp) {
             def displayName = childDevice.label ? childDevice.label : childDevice.name + ep
             def desc = "${displayName} Is ${onOffMapByEP[ep]}"
             eventStack.push(createEvent(name: displayName, value: onOffMapByEP[ep], descriptionText: desc, displayed: true))
         }
     }
-    
+
     eventStack.push(createEvent(name: "allstates", value: allState, displayed: false))
+
+    // 전등이 하나라도 켜져있거나 다 꺼져있으면 parent switch에도 켜짐 상태를 반영해준다. 그렇지 않으면 off
+    eventStack.push(createEvent(name: "switch", value: isOnAny ? "on" : "off", displayed: false));
+
     state.switchOp = false
     return eventStack
+}
+
+def getChildDeviceWithEP(strEP) {
+    def ep = strEP as int
+    def selectedChild
+    childDevices.each { childDevice ->
+        def childEP = getEPFromChildDNID(childDevice.deviceNetworkId)
+        if (childEP == ep) {
+            selectedChild = childDevice;
+        }
+    }
+    return selectedChild;
 }
 
 def getCommandType(description, parseMap, event) {
@@ -230,7 +252,7 @@ def getCommandType(description, parseMap, event) {
     // parseMap:[profileId:0104, clusterId:0006, sourceEndpoint:01, destinationEndpoint:01, options:0140, messageType:00, command:01, direction:01, attrId:0011, resultCode:00, encoding:18, value:00, isValidForDataType:true, data:[11, 00, 00, 18, 00], clusterInt:6, attrInt:17, commandInt:1], event:[name:switch, value:off]
     // Refresh (전부 켜져있을 때)
     // parseMap:[profileId:0104, clusterId:0006, sourceEndpoint:01, destinationEndpoint:01, options:0140, messageType:00, command:01, direction:01, attrId:0011, resultCode:00, encoding:18, value:07, isValidForDataType:true, data:[11, 00, 00, 18, 07], clusterInt:6, attrInt:17, commandInt:1], event:[name:switch, value:off]
-    if(isParseMapValid && parseMap.command == "01" && parseMap.attrId == "0011") {
+    if (isParseMapValid && parseMap.command == "01" && parseMap.attrId == "0011") {
         return "REFRESH"
     }
 
@@ -241,7 +263,7 @@ def getCommandType(description, parseMap, event) {
     // 전체 끄기
     // parseMap: [profileId:0104, clusterId:0006, sourceEndpoint:01, destinationEndpoint:01, options:0140, messageType:00, command:04, direction:01, data:[00], clusterInt:6, commandInt:4], event: [:]
     // 구성상으로는 전체 켜기와 동일하다. 이후 n번 switch  off 이벤트가 날아오고, 이 switch off 이벤트 형식은 물리조작시 날아오는 이벤트와 동일하다.
-    if(isParseMapValid && parseMap.command == "04" && parseMap.sourceEndpoint == "01" && parseMap.destinationEndpoint == "01" ) {
+    if (isParseMapValid && parseMap.command == "04" && parseMap.sourceEndpoint == "01" && parseMap.destinationEndpoint == "01") {
         return "ALLONOFF"
     }
 
@@ -253,20 +275,19 @@ def getCommandType(description, parseMap, event) {
     // description: on/off: 0, parseMap: [:], event: [name:switch, value:off]
     // 
     // * EP가 날아오지 않는다. 추후 읽어들일 필요가있다.
-    if( !isParseMapValid && description.startsWith("on/off") && event.name == "switch") {
+    if (!isParseMapValid && description.startsWith("on/off") && event.name == "switch") {
         return "SWITCH_OP"
     }
-    
-    // 개별 스위치 끄고 켜기 
+
+    // APP 에서의 개별 스위치 끄고 켜기
     // ---------------------------------------------------------
     // parseMap: [profileId:0104, clusterId:0006, sourceEndpoint:02, destinationEndpoint:01, options:0140, messageType:00, command:0B, direction:01, data:[00, 00], clusterInt:6, commandInt:11], event: [name:switch, value:off]
     // parseMap: [profileId:0104, clusterId:0006, sourceEndpoint:02, destinationEndpoint:01, options:0140, messageType:00, command:0B, direction:01, data:[01, 00], clusterInt:6, commandInt:11], event: [name:switch, value:on]
     //
-    // * 이 DTH에서 사용하지는 않음
-    if( isParseMapValid && parseMap.command == "0B" ) {
+    if (isParseMapValid && parseMap.command == "0B") {
         return "SWITCH_OP_APP"
     }
-    
+
 }
 
 // Parse incoming device messages to generate events
@@ -275,30 +296,32 @@ def parse(String description) {
     def event = zigbee.getEvent(description)
 
     def commandType = getCommandType(description, parseMap, event)
-    if( "REFRESH" == commandType ) {
+
+    log.debug "Before Handle - commandType: ${commandType}, description: ${description}, parseMap: ${parseMap}, event: ${event}"
+
+    if ("REFRESH" == commandType) {
         return processRefresh(parseMap.value)
     }
-    
-    if( "ALLONOFF" == commandType) {
+
+    if ("ALLONOFF" == commandType) {
         return null;
     }
-    
-    if( "SWITCH_OP_APP" == commandType) {
-        return null;
+
+    if ("SWITCH_OP_APP" == commandType && parseMap.sourceEndpoint != null) {
+        def child = getChildDeviceWithEP(parseMap.sourceEndpoint)
+        if (child != null) {
+            return child.sendEvent(name: "switch", value: event.value, displayed: true)
+        }
     }
-    
-    if( "SWITCH_OP" == commandType) {
+
+    if ("SWITCH_OP" == commandType) {
         state.switchOp = true
-        runIn(1, delayedRefresh, [overwrite: true])
+        doCommand(getRefreshCommand())
         return null
     }
 
     log.debug "Unhandled Event - commandType: ${commandType}, description: ${description}, parseMap: ${parseMap}, event: ${event}"
     return null
-}
-
-def delayedRefresh() {
-    doCommands(getRefreshCommands())
 }
 
 def off() {
@@ -362,7 +385,7 @@ def ping() {
 
 def refresh() {
     log.debug "Executing 'refresh' for 0x${device.deviceNetworkId}"
-    return getRefreshCommands()
+    return getRefreshCommand()
 }
 
 def configure() {
@@ -372,11 +395,8 @@ def configure() {
     return refresh()
 }
 
-def getRefreshCommands() {
-    def cmds = []
-    cmds << "st rattr 0x${device.deviceNetworkId} 1 0x0006 0x0011"
-    cmds << "delay 50"
-    return cmds
+def getRefreshCommand() {
+    "st rattr 0x${device.deviceNetworkId} 1 0x0006 0x0011"
 }
 
 private doCommand(cmd) {
