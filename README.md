@@ -7,6 +7,10 @@
 - 1구 전등 스위치는 SmartThings의 'ZigBee Switch'를 사용하시기 바랍니다.
 
 # 업데이트 내역
+## 1.0.3 (2018.03.31)
+ - SmartThings app (new app) 지원 강화
+ - app 에서 전등을 켜고 껐을 때 상태 반영 속도 개선(Multi end point zigbee device 의 파싱 변경 사항에 대한 대응)
+ 
 ## 1.0.2 (2018.10.29)
  - SmartThings App(클래식 앱이 아닌)에서 켜고 끄기를 지원합니다.
  - 1구 DTH를 삭제하였습니다. (기본으로 제공하는 'ZigBee Switch' DTH에 비해 장점이 없습니다)
